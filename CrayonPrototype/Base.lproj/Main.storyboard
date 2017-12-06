@@ -28,8 +28,16 @@
                                     <action selector="upWithSender:" destination="FTf-tI-gYe" eventType="touchUpInside" id="IVg-yc-Y5q"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="yW4-xf-ery">
+                                <rect key="frame" x="168" y="617" width="38" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="down"/>
+                                <connections>
+                                    <action selector="downWithSender:" destination="FTf-tI-gYe" eventType="touchUpInside" id="Brz-dg-Ynx"/>
+                                </connections>
+                            </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="o0l-ny-CWg">
-                                <rect key="frame" x="225" y="542" width="32" height="30"/>
+                                <rect key="frame" x="239" y="576" width="32" height="30"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <state key="normal" title="right"/>
                                 <connections>
@@ -37,19 +45,19 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Zxv-no-uby">
-                                <rect key="frame" x="138" y="542" width="30" height="30"/>
+                                <rect key="frame" x="106" y="576" width="30" height="30"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <state key="normal" title="left"/>
                                 <connections>
                                     <action selector="leftWithSender:" destination="FTf-tI-gYe" eventType="touchUpInside" id="bSJ-w7-pRt"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="yW4-xf-ery">
-                                <rect key="frame" x="168" y="580" width="38" height="30"/>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="yG2-jh-4SC">
+                                <rect key="frame" x="268" y="408" width="41" height="30"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="down"/>
+                                <state key="normal" title="SYNC"/>
                                 <connections>
-                                    <action selector="downWithSender:" destination="FTf-tI-gYe" eventType="touchUpInside" id="Brz-dg-Ynx"/>
+                                    <action selector="sync:" destination="FTf-tI-gYe" eventType="touchUpInside" id="8JZ-rn-CTm"/>
                                 </connections>
                             </button>
                         </subviews>

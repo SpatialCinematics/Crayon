@@ -16,8 +16,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     let connectionManager = ConnectionManager()
     
     var syncTransform: matrix_float4x4?
+    var previousTransform: matrix_float4x4?
     var syncColumn: SCNVector3?
     var shipNode: SCNNode?
+    
+    var synced: Bool = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -41,9 +44,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                 shipNode = node
             }
         }
-        
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTap(_:)))
-        view.addGestureRecognizer(tapGesture)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -69,27 +69,26 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Release any cached data, images, etc that aren't in use.
     }
     
-    @objc
-    func didTap(_ sender: AnyObject) {
+    @IBAction func sync(_ sender: AnyObject) {
         if let currentFrame = sceneView.session.currentFrame {
             connectionManager.sync(transform: currentFrame.camera.transform)
         }
     }
     
     @IBAction func left(sender: AnyObject) {
-        shipNode?.position.x -= 0.1
+        shipNode?.position.x -= 0.05
     }
     
     @IBAction func right(sender: AnyObject) {
-        shipNode?.position.x += 0.1
+        shipNode?.position.x += 0.05
     }
     
     @IBAction func up(sender: AnyObject) {
-        shipNode?.position.y += 0.1
+        shipNode?.position.y += 0.05
     }
     
     @IBAction func down(sender: AnyObject) {
-        shipNode?.position.y -= 0.1
+        shipNode?.position.y -= 0.05
     }
 
     // MARK: - ARSCNViewDelegate
@@ -136,6 +135,22 @@ extension ViewController: ConnectionManagerDelegate {
     func locationChanged(manager: ConnectionManager, location: matrix_float4x4) {
         print("Received Location: \(location)")
         
+        guard synced else { return }
+        
+        guard let previousTransform = previousTransform else {
+            self.previousTransform = location
+            return
+        }
+        
+        let prevPos = previousTransform.position()
+        let newPos = location.position()
+        
+        let posDiff = SCNVector3Make(newPos.x - prevPos.x, newPos.y - prevPos.y, newPos.z - prevPos.z)
+        
+        shipNode?.position.x += posDiff.x
+        shipNode?.position.y += posDiff.y
+        shipNode?.position.z += posDiff.z
+        
 //        shipNode? = SCNMatrix4(location)
 
 //        if let syncC = syncColumn {
@@ -150,6 +165,7 @@ extension ViewController: ConnectionManagerDelegate {
     func syncUpdate(manager: ConnectionManager, location: matrix_float4x4) {
         print("Received sync call for location: \(location)")
         
+        synced = true
 //        if let currentFrame = sceneView.session.currentFrame {
 //            syncTransform = location - currentFrame.camera.transform
 //            syncColumn = SCNVector3Make(location.columns.3.x - currentFrame.camera.transform.columns.3.x,
