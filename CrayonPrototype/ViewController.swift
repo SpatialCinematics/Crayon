@@ -167,7 +167,11 @@ extension ViewController: ConnectionManagerDelegate {
         shipNode?.position.y += posDiff.y
         shipNode?.position.z += posDiff.z
         
-        shipNode?.eulerAngles = SCNVector3Make(angles.x, angles.y, angles.z)
+        shipNode?.eulerAngles.x = angles.x
+        shipNode?.eulerAngles.y = angles.y
+        shipNode?.eulerAngles.z = angles.z
+
+        
         
         self.previousTransform = location 
         
