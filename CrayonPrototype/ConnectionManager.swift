@@ -13,7 +13,7 @@ import ARKit
 protocol ConnectionManagerDelegate {
     
     func connectedDevicesChanged(manager : ConnectionManager, connectedDevices: [String])
-    func locationChanged(manager : ConnectionManager, location: matrix_float4x4)
+    func locationChanged(manager : ConnectionManager, location: matrix_float4x4, angles: vector_float3)
     func syncUpdate(manager: ConnectionManager, location: matrix_float4x4)
     
 }
@@ -59,23 +59,10 @@ class ConnectionManager: NSObject {
         serviceBrowser.startBrowsingForPeers()
     }
     
-    func send(location: (String, String, String)) {
-        NSLog("%@", "sendLocation: \(location) to \(session.connectedPeers.count) peers")
-        let locationString = "\(location.0),\(location.1),\(location.2)"
-        if session.connectedPeers.count > 0 {
-            do {
-                try self.session.send(locationString.data(using: .utf8)!, toPeers: session.connectedPeers, with: .reliable)
-            }
-            catch let error {
-                NSLog("%@", "Error for sending: \(error)")
-            }
-        }
-    }
-    
     func sync(transform: matrix_float4x4) {
         if session.connectedPeers.count > 0 {
             do {
-                try self.session.send(archiveMatrix(transform, pingType: .sync), toPeers: session.connectedPeers, with: .reliable)
+                try self.session.send(archiveMatrix(transform, .sync), toPeers: session.connectedPeers, with: .reliable)
             }
             catch let error {
                 NSLog("%@", "Error for sending: \(error)")
@@ -83,10 +70,10 @@ class ConnectionManager: NSObject {
         }
     }
     
-    func send(transform: matrix_float4x4) {
+    func send(transform: matrix_float4x4, angles: vector_float3) {
         if session.connectedPeers.count > 0 {
             do {
-                try self.session.send(archiveMatrix(transform, pingType: .update), toPeers: session.connectedPeers, with: .reliable)
+                try self.session.send(archiveMatrix(transform, angles, .update), toPeers: session.connectedPeers, with: .reliable)
             }
             catch let error {
                 NSLog("%@", "Error for sending: \(error)")
@@ -94,19 +81,34 @@ class ConnectionManager: NSObject {
         }
     }
     
-    private func archiveMatrix(_ transform: matrix_float4x4, pingType ping: PingType) -> Data {
+    private func archiveMatrix(_ transform: matrix_float4x4, _ ping: PingType) -> Data {
+        let column0 = [String(transform.columns.0.w), String(transform.columns.0.x), String(transform.columns.0.y), String(transform.columns.0.z)]
+        let column1 = [String(transform.columns.1.w), String(transform.columns.1.x), String(transform.columns.1.y), String(transform.columns.1.z)]
+        let column2 = [String(transform.columns.2.w), String(transform.columns.2.x), String(transform.columns.2.y), String(transform.columns.2.z)]
+        let column3 = [String(transform.columns.3.w), String(transform.columns.3.x), String(transform.columns.3.y), String(transform.columns.3.z)]
+        
+        let columnsArray = [column0, column1, column2, column3]
+        let dict = ["columnsArray" : columnsArray,
+                    "pingType" : ping.description] as [String : Any]
+        let archivedTransform = NSKeyedArchiver.archivedData(withRootObject: dict)
+        return archivedTransform
+    }
+    
+    private func archiveMatrix(_ transform: matrix_float4x4, _ angles: vector_float3, _ ping: PingType) -> Data {
         let column0 = [String(transform.columns.0.w), String(transform.columns.0.x), String(transform.columns.0.y), String(transform.columns.0.z)]
         let column1 = [String(transform.columns.1.w), String(transform.columns.1.x), String(transform.columns.1.y), String(transform.columns.1.z)]
         let column2 = [String(transform.columns.2.w), String(transform.columns.2.x), String(transform.columns.2.y), String(transform.columns.2.z)]
         let column3 = [String(transform.columns.3.w), String(transform.columns.3.x), String(transform.columns.3.y), String(transform.columns.3.z)]
 
         let columnsArray = [column0, column1, column2, column3]
-        let dict = ["columnsArray" : columnsArray, "pingType" : ping.description] as [String : Any]
+        let dict = ["columnsArray" : columnsArray,
+                    "pingType" : ping.description,
+                    "angles" : [String(angles.x), String(angles.y), String(angles.z)]] as [String : Any]
         let archivedTransform = NSKeyedArchiver.archivedData(withRootObject: dict)
         return archivedTransform
     }
     
-    private func unarchiveDataMatrix(_ data: Data) -> (pingType: PingType, matrix: matrix_float4x4) {
+    private func unarchiveDataMatrix(_ data: Data) -> (pingType: PingType, matrix: matrix_float4x4, angles: vector_float3?) {
         let dict = NSKeyedUnarchiver.unarchiveObject(with: data) as! [String : Any]
         
         let pingDescription = dict["pingType"] as! String
@@ -140,8 +142,13 @@ class ConnectionManager: NSObject {
         matrix.columns.3.x = Float(columnsArray[3][1])!
         matrix.columns.3.y = Float(columnsArray[3][2])!
         matrix.columns.3.z = Float(columnsArray[3][3])!
+        
+        var angles: vector_float3?
 
-        return (pingType, matrix)
+        if let stringAngles = dict["angles"] as? [String] {
+            angles = vector_float3(x: Float(stringAngles[0])!, y: Float(stringAngles[1])!, z: Float(stringAngles[2])!)
+        }
+        return (pingType, matrix, angles)
     }
     
     deinit {
@@ -192,7 +199,9 @@ extension ConnectionManager: MCSessionDelegate {
         case .sync:
             delegate?.syncUpdate(manager: self, location: unarchivedPing.matrix)
         case .update:
-            delegate?.locationChanged(manager: self, location: unarchivedPing.matrix)
+            if let angles = unarchivedPing.angles {
+                delegate?.locationChanged(manager: self, location: unarchivedPing.matrix, angles: angles)
+            }
         }
 //        let str = String(data: data, encoding: .utf8)!
 //        let stringArray = str.components(separatedBy: ",")

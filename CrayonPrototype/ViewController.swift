@@ -13,6 +13,11 @@ import ARKit
 class ViewController: UIViewController, ARSCNViewDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
+    
+    @IBOutlet weak var shipXLabel: UILabel!
+    @IBOutlet weak var shipYLabel: UILabel!
+    @IBOutlet weak var shipZLabel: UILabel!
+
     let connectionManager = ConnectionManager()
     
     var syncTransform: matrix_float4x4?
@@ -107,8 +112,19 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
         if let currentFrame = sceneView.session.currentFrame {
-            connectionManager.send(transform: currentFrame.camera.transform)
+            connectionManager.send(transform: currentFrame.camera.transform, angles: currentFrame.camera.eulerAngles)
         }
+    }
+    
+    func renderer(_ renderer: SCNSceneRenderer, didRenderScene scene: SCNScene, atTime time: TimeInterval) {
+        DispatchQueue.main.async {
+            if let shipNode = self.shipNode {
+                self.shipXLabel.text = "X: \(shipNode.position.x)"
+                self.shipYLabel.text = "Y: \(shipNode.position.y)"
+                self.shipZLabel.text = "Z: \(shipNode.position.z)"
+            }
+        }
+        
     }
     
     func session(_ session: ARSession, didFailWithError error: Error) {
@@ -132,7 +148,7 @@ extension ViewController: ConnectionManagerDelegate {
         
     }
     
-    func locationChanged(manager: ConnectionManager, location: matrix_float4x4) {
+    func locationChanged(manager: ConnectionManager, location: matrix_float4x4, angles: vector_float3) {
         print("Received Location: \(location)")
         
         guard synced else { return }
@@ -150,6 +166,10 @@ extension ViewController: ConnectionManagerDelegate {
         shipNode?.position.x += posDiff.x
         shipNode?.position.y += posDiff.y
         shipNode?.position.z += posDiff.z
+        
+        shipNode?.eulerAngles = SCNVector3Make(angles.x, angles.y, angles.z)
+        
+        self.previousTransform = location 
         
 //        shipNode? = SCNMatrix4(location)
 
