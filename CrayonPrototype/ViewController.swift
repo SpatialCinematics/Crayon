@@ -13,6 +13,11 @@ import ARKit
 class ViewController: UIViewController, ARSCNViewDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
+    let connectionManager = ConnectionManager()
+    
+    var syncTransform: matrix_float4x4?
+    var syncColumn: SCNVector3?
+    var shipNode: SCNNode?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,6 +33,17 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // Set the scene to the view
         sceneView.scene = scene
+        
+        connectionManager.delegate = self
+        
+        sceneView.scene.rootNode.childNodes.forEach { (node) in
+            if node.name == "ship" {
+                shipNode = node
+            }
+        }
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTap(_:)))
+        view.addGestureRecognizer(tapGesture)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -35,7 +51,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // Create a session configuration
         let configuration = ARWorldTrackingConfiguration()
-
+        configuration.worldAlignment = .gravityAndHeading
+        
         // Run the view's session
         sceneView.session.run(configuration)
     }
@@ -51,6 +68,29 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         super.didReceiveMemoryWarning()
         // Release any cached data, images, etc that aren't in use.
     }
+    
+    @objc
+    func didTap(_ sender: AnyObject) {
+        if let currentFrame = sceneView.session.currentFrame {
+            connectionManager.sync(transform: currentFrame.camera.transform)
+        }
+    }
+    
+    @IBAction func left(sender: AnyObject) {
+        shipNode?.position.x -= 0.1
+    }
+    
+    @IBAction func right(sender: AnyObject) {
+        shipNode?.position.x += 0.1
+    }
+    
+    @IBAction func up(sender: AnyObject) {
+        shipNode?.position.y += 0.1
+    }
+    
+    @IBAction func down(sender: AnyObject) {
+        shipNode?.position.y -= 0.1
+    }
 
     // MARK: - ARSCNViewDelegate
     
@@ -62,6 +102,15 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         return node
     }
 */
+    func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
+        print("new node")
+    }
+    
+    func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
+        if let currentFrame = sceneView.session.currentFrame {
+            connectionManager.send(transform: currentFrame.camera.transform)
+        }
+    }
     
     func session(_ session: ARSession, didFailWithError error: Error) {
         // Present an error message to the user
@@ -76,5 +125,44 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     func sessionInterruptionEnded(_ session: ARSession) {
         // Reset tracking and/or remove existing anchors if consistent tracking is required
         
+    }
+}
+
+extension ViewController: ConnectionManagerDelegate {
+    func connectedDevicesChanged(manager: ConnectionManager, connectedDevices: [String]) {
+        
+    }
+    
+    func locationChanged(manager: ConnectionManager, location: matrix_float4x4) {
+        print("Received Location: \(location)")
+        
+//        shipNode? = SCNMatrix4(location)
+
+//        if let syncC = syncColumn {
+//           let post =  SCNVector3(syncC.x + location.columns.3.x,
+//                       syncC.y + location.columns.3.y,
+//                       syncC.z + location.columns.3.z)
+//
+//            shipNode?.position = post
+//        }
+    }
+    
+    func syncUpdate(manager: ConnectionManager, location: matrix_float4x4) {
+        print("Received sync call for location: \(location)")
+        
+//        if let currentFrame = sceneView.session.currentFrame {
+//            syncTransform = location - currentFrame.camera.transform
+//            syncColumn = SCNVector3Make(location.columns.3.x - currentFrame.camera.transform.columns.3.x,
+//                                        location.columns.3.y - currentFrame.camera.transform.columns.3.y,
+//                                        location.columns.3.z - currentFrame.camera.transform.columns.3.z)
+//        }
+    }
+    
+    
+}
+
+extension matrix_float4x4 {
+    func position() -> SCNVector3 {
+        return SCNVector3(columns.3.x, columns.3.y, columns.3.z)
     }
 }

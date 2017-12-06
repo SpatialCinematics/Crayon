@@ -13,6 +13,7 @@
 		135688B21FD5FFC4008FB300 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 135688B01FD5FFC4008FB300 /* Main.storyboard */; };
 		135688B41FD5FFC4008FB300 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 135688B31FD5FFC4008FB300 /* Assets.xcassets */; };
 		135688B71FD5FFC4008FB300 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 135688B51FD5FFC4008FB300 /* LaunchScreen.storyboard */; };
+		135688BF1FD60B02008FB300 /* ConnectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 135688BE1FD60B02008FB300 /* ConnectionManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +25,7 @@
 		135688B31FD5FFC4008FB300 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		135688B61FD5FFC4008FB300 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		135688B81FD5FFC4008FB300 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		135688BE1FD60B02008FB300 /* ConnectionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,6 +65,7 @@
 				135688B31FD5FFC4008FB300 /* Assets.xcassets */,
 				135688B51FD5FFC4008FB300 /* LaunchScreen.storyboard */,
 				135688B81FD5FFC4008FB300 /* Info.plist */,
+				135688BE1FD60B02008FB300 /* ConnectionManager.swift */,
 			);
 			path = CrayonPrototype;
 			sourceTree = "<group>";
@@ -141,6 +144,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				135688AF1FD5FFC4008FB300 /* ViewController.swift in Sources */,
+				135688BF1FD60B02008FB300 /* ConnectionManager.swift in Sources */,
 				135688AB1FD5FFC4008FB300 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -281,6 +285,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = T94GCXG3BN;
 				INFOPLIST_FILE = CrayonPrototype/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.Crayon.CrayonPrototype;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -296,6 +301,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = T94GCXG3BN;
 				INFOPLIST_FILE = CrayonPrototype/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.Crayon.CrayonPrototype;
 				PRODUCT_NAME = "$(TARGET_NAME)";
