@@ -25,6 +25,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var syncColumn: SCNVector3?
     var shipNode: SCNNode?
     
+    var isDrawing = false
+    
+    var otherCamera = SCNVector3(0,0,0)
+    
     var synced: Bool = false
     
     override func viewDidLoad() {
@@ -80,21 +84,13 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         }
     }
     
-    @IBAction func left(sender: AnyObject) {
-        shipNode?.position.x -= 0.05
+
+    @IBAction func draw(_ sender: Any) {
+        isDrawing = true
     }
     
-    @IBAction func right(sender: AnyObject) {
-        shipNode?.position.x += 0.05
-    }
     
-    @IBAction func up(sender: AnyObject) {
-        shipNode?.position.y += 0.05
-    }
     
-    @IBAction func down(sender: AnyObject) {
-        shipNode?.position.y -= 0.05
-    }
 
     // MARK: - ARSCNViewDelegate
     
@@ -124,7 +120,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                 self.shipZLabel.text = "Z: \(shipNode.position.z)"
             }
         }
-        
     }
     
     func session(_ session: ARSession, didFailWithError error: Error) {
@@ -163,6 +158,8 @@ extension ViewController: ConnectionManagerDelegate {
         
         let posDiff = SCNVector3Make(newPos.x - prevPos.x, newPos.y - prevPos.y, newPos.z - prevPos.z)
         
+        
+        /*
         shipNode?.position.x += posDiff.x
         shipNode?.position.y += posDiff.y
         shipNode?.position.z += posDiff.z
@@ -170,32 +167,35 @@ extension ViewController: ConnectionManagerDelegate {
         shipNode?.eulerAngles.x = angles.x
         shipNode?.eulerAngles.y = angles.y
         shipNode?.eulerAngles.z = angles.z
-
+         */
+        
+        
+        //Light Painting!
+        otherCamera.x += posDiff.x
+        otherCamera.y += posDiff.y
+        otherCamera.z += posDiff.z
+        
+        
+        if isDrawing{
+            let box = SCNBox(width: 0.01, height: 0.01, length: 0.01, chamferRadius: 0)
+            let material = SCNMaterial()
+            material.diffuse.contents = UIColor.red
+            box.materials = [material]
+            let cubeNode = SCNNode(geometry: box)
+            sceneView.scene.rootNode.addChildNode(cubeNode)
+            cubeNode.position = otherCamera
+        }
         
         
         self.previousTransform = location 
         
-//        shipNode? = SCNMatrix4(location)
 
-//        if let syncC = syncColumn {
-//           let post =  SCNVector3(syncC.x + location.columns.3.x,
-//                       syncC.y + location.columns.3.y,
-//                       syncC.z + location.columns.3.z)
-//
-//            shipNode?.position = post
-//        }
     }
     
     func syncUpdate(manager: ConnectionManager, location: matrix_float4x4) {
         print("Received sync call for location: \(location)")
         
         synced = true
-//        if let currentFrame = sceneView.session.currentFrame {
-//            syncTransform = location - currentFrame.camera.transform
-//            syncColumn = SCNVector3Make(location.columns.3.x - currentFrame.camera.transform.columns.3.x,
-//                                        location.columns.3.y - currentFrame.camera.transform.columns.3.y,
-//                                        location.columns.3.z - currentFrame.camera.transform.columns.3.z)
-//        }
     }
     
     
